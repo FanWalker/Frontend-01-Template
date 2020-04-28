@@ -1,4 +1,4 @@
-####JavaScript | 表达式，类型准换
+#### JavaScript | 表达式，类型准换
 补充写完函数 convertStringToNumber，以及函数 convertNumberToString
 
 	  function convertStringToNumber(string, x) {
