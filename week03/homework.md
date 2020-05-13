@@ -1,4 +1,4 @@
-####JavaScript | 表达式，类型准换
+#### JavaScript | 表达式，类型准换
 补充写完函数 convertStringToNumber，以及函数 convertNumberToString
 
 	  function convertStringToNumber(string, x) {
@@ -47,6 +47,7 @@
 	    return string;
 	  }
 	  console.log(convertNumberToString(122.121, 10));
+<<<<<<< HEAD
 
 
 #### JavaScript 标准里所有的对象，分析有哪些对象是我们无法实现出来的，这些对象都有哪些特性
@@ -73,3 +74,5 @@
 
 
 
+=======
+>>>>>>> c672761024859dbf69ba59cf152a0eded1abd3a6
