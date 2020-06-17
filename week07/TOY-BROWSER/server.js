@@ -9,6 +9,9 @@ const server = http.createServer((req, res) => {
 `<html maaa=a >
 <head>
     <style>
+div #myid.root{
+    color: red;
+}
 #container {
     width:500px;
     height:300px;
@@ -27,8 +30,8 @@ const server = http.createServer((req, res) => {
     </style>
 </head>
 <body>
-    <div id="container">
-        <div id="myid"/>
+    <div id="container wrap">
+        <div id="myid" class="root"/>
         <div class="c1" />
     </div>
 </body>
