@@ -1,0 +1,77 @@
+<style>
+  div {
+    margin: 20px;
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    background-color: #ddd;
+    display: inline-block;
+  }
+  .green.light {
+    background-color: green;
+  }
+  .yellow.light {
+    background-color: yellow;
+  }
+  .red.light {
+    background-color: red;
+  }
+</style>
+<body>
+  <div class="green"></div>
+  <div class="yellow""></div>
+  <div class="red"></div>
+  <button id="next">next</button>
+</body>
+
+<script>
+  function color(color) {
+    let lights = document.getElementsByTagName("div");
+    for (let i = 0; i < 3; i++) {
+      lights[i].classList.remove("light");
+    }
+    document.getElementsByClassName(color)[0].classList.add("light");
+  }
+
+  function sleep(time) {
+    return new Promise((resolve, reject) => {
+      setTimeout(resolve, time);
+    });
+  }
+
+  function happen(element, eventName) {
+    return new Promise((resolve, reject) => {
+      element.addEventListener(eventName, resolve, {once: true});
+    });
+  }
+
+  function* go() {
+    while(true) {
+      color("green");
+      yield sleep(1000);
+      color("yellow");
+      yield sleep(1000);
+      color("red");
+      yield sleep(1000);
+    }
+  }
+
+  function run(iterator) {
+    let {value, done} = iterator.next();
+      if (done) {
+        return ;
+      }
+      if (value instanceof Promise) {
+        value.then(() => {
+          run(iterator);
+        })
+      }
+  }
+
+  function co(generator) {
+    return function() {
+      return run(generator());
+    }
+  }
+  go = co(go);
+</script>

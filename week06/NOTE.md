@@ -71,6 +71,18 @@
 
 第五步：计算选择器与元素匹配
 
-第六步：生成computed属性
+根据选择器的类型和元素属性，计算是否与当前元素匹配；这里只实现了三种基本选择器，实际的浏览器中要处理复合选择器
+
+第六步：生成computed属性加入到element
+
+一旦选择匹配，就应用选择器到元素上，形成computedStyle
 
 第七步：确定覆盖规则关系
+
+CSS规则根据specificity和后来优先规则覆盖；specificity是个四元组，越左边权重越高；一个CSS规则的specificity根据包含的简单选择器相加而成
+
+
+	body div a.x#y {
+		color: red;
+	}
+	specificity：[0, 1, 1, 3] 最左边的代表的是inline样式个数，第二个是id选择器，第三个是class选择器，第四个是标签选择器

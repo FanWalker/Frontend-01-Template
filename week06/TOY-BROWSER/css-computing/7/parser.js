@@ -110,7 +110,7 @@ function specificity(selector) {
   for (let part of selectorParts) {
     if (part.charAt(0) === '#') {
       p[1] += 1;
-    } else if () {
+    } else if (part.charAt(0) === '.') {
       p[2] += 1;
     } else {
       p[3] += 1;

@@ -52,9 +52,23 @@
     }
     color = 3 - color;
     show();
-    if (willWin(pattern, color)) {
-      console.log(color === 2 ? "X will win" : "O is win");
+    // if (willWin(pattern, color)) {
+    //   console.log(color === 2 ? "X will win" : "O is win");
+    // }
+    computeMove()
+  }
+
+  function computeMove() {
+    let choice = bestChoice(pattern, color);
+    if (choice.point) {
+      console.log('choice.point', choice.point);
+      pattern[choice.point[1]][choice.point[0]] = color;
     }
+    if (check(pattern, color)) {
+      alert(color === 2 ? "X is winner" : "O is winner");
+    }
+    color = 3 - color;
+    show();
   }
 
   function check(pattern, color) {

@@ -1,0 +1,51 @@
+<style>
+  div {
+    margin: 20px;
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    background-color: #ddd;
+    display: inline-block;
+  }
+  .green.light {
+    background-color: green;
+  }
+  .yellow.light {
+    background-color: yellow;
+  }
+  .red.light {
+    background-color: red;
+  }
+</style>
+<body>
+  <div class="green"></div>
+  <div class="yellow""></div>
+  <div class="red"></div>
+</body>
+
+<script>
+  function color(color) {
+    let lights = document.getElementsByTagName("div");
+    for (let i = 0; i < 3; i++) {
+      lights[i].classList.remove("light");
+    }
+    document.getElementsByClassName(color)[0].classList.add("light");
+  }
+
+  function sleep(time) {
+    return new Promise((resolve, reject) => {
+      setTimeout(resolve, time);
+    });
+  }
+
+  function go() {
+    color("green");
+    sleep(1000).then(() => {
+      color("yellow");
+      return sleep(1000);
+    }).then(() => {
+      color("red");
+      return sleep(1000);
+    }).then(go);
+  }
+</script>
