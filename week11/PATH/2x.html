@@ -13,7 +13,7 @@
     }
 </style>
 <div id="container"></div>
-<button onclick="localStorage.map = JSON.stringify(map)">save</button>
+<button onclick="save()">save</button>
 
 <script>
     var map = localStorage.map ? JSON.parse(localStorage.map) : new Array(10000).fill(0);
@@ -53,7 +53,39 @@
 
     document.addEventListener('contextmenu', e => e.preventDefault())
 
-    function path(map, start, end) {
-        
+    function save() {
+        localStorage.map = JSON.stringify(map);
+    }
+
+    function findPath(map, start, end) {
+        map = map.slice();
+
+        // 一个点有三个状态，白格，紫格、蓝格
+        let queue = [start];
+
+        function insert([x, y]) {
+            // 判断边界
+            if (x < 0 || x >= 100 || y < 0 || y >= 100) {
+                return ;
+            }
+            // 判断有没有墙
+            if (map[y * 100 + x] !== 0) {
+                return ;
+            }
+            map[y * 100 + x] = 2;
+            queue.push([x, y]);
+        }
+
+        while(queue.length) {
+            let [x, y] = queue.shift();
+            if (x === end[0] && y === end[1]) {
+                return true;
+            }
+            // 上、下、左、右
+            insert([x - 1, y]);
+            insert([x, y - 1]);
+            insert([x + 1, y]);
+            insert([x, y + 1]);
+        }
     }
 </script>
