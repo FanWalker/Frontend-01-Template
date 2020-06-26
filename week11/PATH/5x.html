@@ -1,15 +1,16 @@
 <style>
   .cell {
-      display:inline-block;
-      width:6px;
-      height:6px;
-      background-color: gray;
-      border-bottom:solid 1px white;
-      border-right:solid 1px white;
-      vertical-align: middle;
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background-color: gray;
+    border-bottom: solid 1px white;
+    border-right: solid 1px white;
+    vertical-align: middle;
   }
-  #container{
-      width:701px;
+
+  #container {
+    width: 701px;
   }
 </style>
 <div id="container"></div>
@@ -27,7 +28,7 @@
     }
     take() {
       if (!this.data.length) {
-        reutrn ;
+        reutrn;
       }
       let min = this.data[0];
       let i = 0;
@@ -57,10 +58,10 @@
     }
     insertAt(i, v) {
       this.data[i] = v;
-      while(i > 0 && this.compare(v, this.data[Math.floor((i-1)/2)]) < 0) {
-        this.data[i] = this.data[Math.floor((i-1)/2)];
-        this.data[Math.floor((i-1)/2)] = v;
-        i = Math.floor((i-1)/2);
+      while (i > 0 && this.compare(v, this.data[Math.floor((i - 1) / 2)]) < 0) {
+        this.data[i] = this.data[Math.floor((i - 1) / 2)];
+        this.data[Math.floor((i - 1) / 2)] = v;
+        i = Math.floor((i - 1) / 2);
       }
     }
     insert(v) {
@@ -70,43 +71,43 @@
 
   var map = localStorage.map ? JSON.parse(localStorage.map) : new Array(10000).fill(0);
   let container = document.getElementById("container");
-  for(let y = 0; y < 100; y++) {
-      for(let x = 0; x < 100; x++) {
-          let cell = document.createElement("div");
-          cell.classList.add("cell");
+  for (let y = 0; y < 100; y++) {
+    for (let x = 0; x < 100; x++) {
+      let cell = document.createElement("div");
+      cell.classList.add("cell");
 
-          if(map[y * 100 + x] === 1)
-              cell.style.backgroundColor = 'black';
+      if (map[y * 100 + x] === 1)
+        cell.style.backgroundColor = 'black';
 
-          cell.addEventListener("mouseover", () => {
-              if(mouse) {
-                  if(clear) {
-                      cell.style.backgroundColor = '';
-                      map[y * 100 + x] = 0;
-                  } else {
-                      cell.style.backgroundColor = 'black';
-                      map[y * 100 + x] = 1;
-                  }
-              }
-                  
-          })
+      cell.addEventListener("mouseover", () => {
+        if (mouse) {
+          if (clear) {
+            cell.style.backgroundColor = '';
+            map[y * 100 + x] = 0;
+          } else {
+            cell.style.backgroundColor = 'black';
+            map[y * 100 + x] = 1;
+          }
+        }
 
-          container.appendChild(cell);
-      }
+      })
+
+      container.appendChild(cell);
+    }
   }
   let mouse = false;
   let clear = false;
 
   document.addEventListener('mousedown', e => {
-      mouse = true
-      clear = (e.which === 3);
+    mouse = true
+    clear = (e.which === 3);
   })
-  document.addEventListener('mouseup', ()=> mouse = false)
+  document.addEventListener('mouseup', () => mouse = false)
 
   document.addEventListener('contextmenu', e => e.preventDefault())
 
   function save() {
-      localStorage.map = JSON.stringify(map);
+    localStorage.map = JSON.stringify(map);
   }
 
   function sleep(time) {
@@ -116,55 +117,65 @@
   }
 
   async function findPath(map, start, end) {
-      map = map.slice();
+    map = map.slice();
 
-      function distance([x, y]) {
-        // 距离终点的距离
-        return (x - end[0]) ** 2 + (y - end[1]) ** 2;
+    let table = new Array(10000).fill(Infinity);
+
+    table[start[1] * 100 + start[0]] = 0;
+
+    function distance([x, y]) {
+      // 距离终点的距离
+      return (x - end[0]) ** 2 + (y - end[1]) ** 2;
+    }
+
+    // 一个点有三个状态，白格，紫格、蓝格
+    let collection = new BinaryHeap([start], (a, b) => distance(a) - distance(b));
+
+    async function insert([x, y], prePoint, fromStart) {
+      // 判断边界
+      if (x < 0 || x >= 100 || y < 0 || y >= 100) {
+        return;
+      }
+      // 判断有没有墙
+      if (map[y * 100 + x] !== 0) {
+        return;
+      }
+      if (fromStart >= table[y * 100 + x]) {
+        return ;
       }
 
-      // 一个点有三个状态，白格，紫格、蓝格
-      let collection = new BinaryHeap([start], (a, b) => distance(a) - distance(b));
+      map[y * 100 + x] = prePoint;
+      table[y * 100 + x] = fromStart;
+      container.children[y * 100 + x].style.backgroundColor = "lightgreen";
+      await sleep(1);
+      collection.insert([x, y]);
+    }
 
-      async function insert([x, y], prePoint) {
-          // 判断边界
-          if (x < 0 || x >= 100 || y < 0 || y >= 100) {
-              return ;
-          }
-          // 判断有没有墙
-          if (map[y * 100 + x] !== 0) {
-              return ;
-          }
-          map[y * 100 + x] = prePoint;
-          container.children[y * 100 + x].style.backgroundColor = "lightgreen";
-          await sleep(1);
-          collection.insert([x, y]);
+    while (collection.length) {
+      // 返回距离终点最小距离的点
+      let [x, y] = collection.take();
+      let fromStart = table[y * 100 + x]
+      if (x === end[0] && y === end[1]) {
+        console.log('finded');
+        let path = [];
+        while (x !== start[0] || y !== start[1]) {
+          path.push([x, y]);
+          container.children[y * 100 + x].style.backgroundColor = "pink";
+          [x, y] = map[y * 100 + x];
+        }
+        return path;
       }
+      // 上、下、左、右
+      await insert([x - 1, y], [x, y], fromStart + 1);
+      await insert([x, y - 1], [x, y], fromStart + 1);
+      await insert([x + 1, y], [x, y], fromStart + 1);
+      await insert([x, y + 1], [x, y], fromStart + 1);
 
-      while(collection.length) {
-          // 返回距离终点最小距离的点
-          let [x, y] = collection.take();
-          if (x === end[0] && y === end[1]) {
-            console.log('finded');
-            let path = [];
-            while(x !== start[0] || y !== start[1]) {
-              path.push([x, y]);
-              container.children[y * 100 + x].style.backgroundColor = "pink";
-              [x, y] = map[y * 100 + x];
-            }
-            return path;
-          }
-          // 上、下、左、右
-          await insert([x - 1, y], [x, y]);
-          await insert([x, y - 1], [x, y]);
-          await insert([x + 1, y], [x, y]);
-          await insert([x, y + 1], [x, y]);
-          
-          await insert([x - 1, y - 1], [x, y]);
-          await insert([x + 1, y - 1], [x, y]);
-          await insert([x - 1, y + 1 ], [x, y]);
-          await insert([x + 1, y + 1], [x, y]);
-      }
-      return null;
+      await insert([x - 1, y - 1], [x, y], fromStart + 1.4);
+      await insert([x + 1, y - 1], [x, y], fromStart + 1.4);
+      await insert([x - 1, y + 1], [x, y], fromStart + 1.4);
+      await insert([x + 1, y + 1], [x, y], fromStart + 1.4);
+    }
+    return null;
   }
 </script>
