@@ -1,33 +1,47 @@
 export class Timeline {
   constructor() {
-    this.animations = [];
+    this.animations = new Set();
+    this.finishedAnimations = new Set();
+    this.addTimes = new Map();
     this.requestID = null;
 
     this.state = 'inited';
 
     this.tick = () => {
       let t = Date.now() - this.startTime;
-      let animations = this.animations.filter(animation => !animation.finished)
-      for (let animation of animations) {
-        let {object, property, template, start, end, duration, delay, timingFunction, addTime} = animation;
-  
-        console.log(delay);
+      // let animations = this.animations.filter(animation => !animation.finished);
+      // console.log(animations);
+      for (let animation of this.animations) {
+        let {object, property, template, start, end, duration, delay, timingFunction} = animation;
+
+        let addTime = this.addTimes.get(animation);
+
+        if (t < delay +addTime) {
+          continue;
+        }
   
         let progression = timingFunction((t - delay - addTime) / duration); // 0-1之间的数
   
         
         if (t > duration + delay + addTime){
           progression = 1;
-          animation.finished = true;
+          // animation.finished = true;
+          this.animations.delete(animation);
+          this.finishedAnimations.add(animation);
         }
   
         // let value = start + progression * (end - start); // value是根据progress算出的当前值
         let value = animation.valueFromProgression(progression)
-
+        // debugger;
         object[property] = template(value);
+
+        // console.log('template(value)',object[property], template(value));
       }
-      if (animations.length)
+      if (this.animations.size) {
         this.requestID = requestAnimationFrame(this.tick);
+      } else {
+        this.requestID = null;
+      }
     }
   }
 
@@ -39,6 +53,7 @@ export class Timeline {
     this.pauseTime = Date.now();
     if (this.requestID !== null) {
       cancelAnimationFrame(this.requestID);
+      this.requestID = null;
     }
   }
 
@@ -51,15 +66,32 @@ export class Timeline {
     this.tick();
   }
 
+  reset() {
+    if (this.state === 'playing') {
+      this.pause();
+    }
+    this.animations = new Set;
+    this.requestID = null;
+    this.state = 'inited';
+    this.startTime = Date.now();
+    this.pauseTime = null;
+    this.addTimes = new Map();
+    this.finishedAnimations = new Set();
+  }
+
   restart() {
     if (this.state === 'playing') {
       this.state = 'paused';
     }
-    this.animations = [];
+    for (let animation of this.finishedAnimations) {
+      this.animations.add(animation);
+    }
+    this.finishedAnimations = new Set();
     this.requestID = null;
     this.state = 'playing';
     this.startTime = Date.now();
     this.pauseTime = null;
+    // this.addTimes = new Map();
     this.tick();
   }
 
@@ -73,13 +105,18 @@ export class Timeline {
   }
   
   add(animation, addTime) {
-    this.animations.push(animation);
-    animation.finished = false;
+    this.animations.add(animation);
+    // animation.finished = false;
     // debugger;
+    if (this.state === 'playing' && this.requestID === null) {
+      this.tick();
+    }
     if (this.state === 'playing')
-      animation.addTime = addTime !== void 0 ? addTime : Date.now() - this.startTime;
+      // animation.addTime = addTime !== void 0 ? addTime : Date.now() - this.startTime;
+      this.addTimes.set(animation, addTime !== void 0 ? addTime : Date.now() - this.startTime);
     else 
-      animation.addTime = addTime !== void 0 ? addTime : 0;
+      // animation.addTime = addTime !== void 0 ? addTime : 0;
+      this.addTimes.set(animation, addTime !== void 0 ? addTime : 0);
   }
 }
 
